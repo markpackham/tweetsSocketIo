@@ -1,18 +1,11 @@
+// NON socket.io && NON express version
 const http = require("http");
 const path = require("path");
-const express = require("express");
-const socketIo = require("socket.io");
 // needle is our http client for requests
 const needle = require("needle");
 // .env file needs this
 const config = require("dotenv").config();
 const TOKEN = process.env.TWITTER_BEARER_TOKEN;
-const PORT = process.env.PORT || 3000;
-
-const app = express();
-
-const server = http.createServer(app);
-const io = socketIo(server);
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =

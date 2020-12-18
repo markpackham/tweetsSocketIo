@@ -14,12 +14,16 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../", "client", "tweetsSocketIo.html"));
+});
+
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&expansions=author_id";
 
 // keyword we are looking for
-const rules = [{ value: "Basingstoke" }];
+const rules = [{ value: "basingstoke" }];
 
 // Get stream rules
 async function getRules() {
@@ -67,7 +71,7 @@ async function deleteRules(rules) {
   return response.body;
 }
 
-function streamTweets() {
+function streamTweets(socket) {
   const stream = needle.get(streamURL, {
     headers: {
       Authorization: `Bearer ${TOKEN}`,
@@ -76,13 +80,15 @@ function streamTweets() {
   stream.on("data", (data) => {
     try {
       const json = JSON.parse(data);
+      socket.emit("tweet", json);
     } catch (error) {
       // the empty catch will keep the stream open even if there are no tweets
     }
   });
 }
 
-(async () => {
+io.on("connection", async () => {
+  console.log("Client connected");
   let currentRules;
 
   try {
@@ -97,5 +103,7 @@ function streamTweets() {
     process.exit(1);
   }
 
-  streamTweets();
-})();
+  streamTweets(io);
+});
+
+server.listen(PORT, () => console.log(`Listening on port ${PORT}`));

@@ -43,7 +43,9 @@
     ></script>
 
     <script>
+      const tweetStream = document.getElementById("tweetStream");
       const socket = io();
+      const tweets = [];
 
       socket.on("connect", () => {
         console.log("Connected to server!");
